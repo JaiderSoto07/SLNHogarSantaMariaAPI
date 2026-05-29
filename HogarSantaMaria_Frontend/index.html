@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hogar Santa María - Gestión</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+        }
+        body {
+            background: #f0f4f8;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #1e3a5f;
+            text-align: center;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 10px;
+        }
+        .tab-btn {
+            background: #e2e8f0;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: 0.2s;
+        }
+        .tab-btn.active {
+            background: #1e3a5f;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .card {
+            background: #f9fafb;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .card h3 {
+            margin-top: 0;
+            color: #0f3b5c;
+        }
+        input, select, textarea, button {
+            margin: 6px 0;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        button {
+            background: #1e3a5f;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        button:hover {
+            background: #0f2b44;
+        }
+        .btn-small {
+            background: #2c6e9e;
+            padding: 6px 12px;
+            width: auto;
+            margin-right: 8px;
+        }
+        .result-area {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 12px;
+            border-radius: 16px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #cbd5e1;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #e2e8f0;
+        }
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        hr {
+            margin: 20px 0;
+        }
+        .status-msg {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        @media (max-width: 800px) {
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🏠 Hogar Santa María - Sistema de Gestión</h1>
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="sanciones">⚖️ Sanciones</button>
+        <button class="tab-btn" data-tab="mantenimiento">🔧 Mantenimiento</button>
+        <button class="tab-btn" data-tab="lavanderia">🧺 Lavandería</button>
+    </div>
+
+    <!-- SECCIÓN SANCIONES -->
+    <div id="sanciones" class="tab-content active">
+        <div class="grid-2">
+            <div class="card">
+                <h3>📝 Registrar falta</h3>
+                <input type="number" id="faltaResidenteId" placeholder="ID Residente (1,2,3)" value="1">
+                <input type="text" id="faltaDescripcion" placeholder="Descripción de la falta">
+                <select id="faltaGravedad">
+                    <option value="Leve">Leve</option>
+                    <option value="Grave">Grave</option>
+                    <option value="MuyGrave">Muy Grave</option>
+                </select>
+                <button id="btnRegistrarFalta">Registrar falta</button>
+                <div id="resultadoFalta" class="result-area"></div>
+            </div>
+            <div class="card">
+                <h3>📋 Todas las sanciones</h3>
+                <button id="btnListarSanciones" class="btn-small">Actualizar lista</button>
+                <div id="listaSanciones" class="result-area" style="max-height: 300px; overflow-y: auto;"></div>
+            </div>
+            <div class="card">
+                <h3>🔍 Sanciones por residente</h3>
+                <input type="number" id="buscarResidenteId" placeholder="ID Residente" value="1">
+                <button id="btnBuscarSanciones">Buscar</button>
+                <div id="sancionesResidente" class="result-area"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN MANTENIMIENTO -->
+    <div id="mantenimiento" class="tab-content">
+        <div class="grid-2">
+            <div class="card">
+                <h3>➕ Crear solicitud</h3>
+                <input type="number" id="solResidenteId" placeholder="ID Residente" value="1">
+                <textarea id="solDescripcion" rows="2" placeholder="Descripción del problema"></textarea>
+                <button id="btnCrearSolicitud">Crear solicitud</button>
+                <div id="resultadoCrearSol" class="result-area"></div>
+            </div>
+            <div class="card">
+                <h3>📋 Todas las solicitudes</h3>
+                <button id="btnListarSolicitudes" class="btn-small">Actualizar</button>
+                <div id="listaSolicitudes" class="result-area" style="max-height: 300px; overflow-y: auto;"></div>
+            </div>
+            <div class="card">
+                <h3>🔎 Buscar por ID y acciones</h3>
+                <input type="number" id="solId" placeholder="ID Solicitud">
+                <button id="btnBuscarSolicitud">Buscar</button>
+                <div id="solicitudDetalle" class="result-area"></div>
+                <div class="flex-row" style="margin-top: 12px;">
+                    <button id="btnAsignarSol" class="btn-small">Asignar</button>
+                    <button id="btnIniciarSol" class="btn-small">Iniciar reparación</button>
+                    <button id="btnCompletarSol" class="btn-small">Completar</button>
+                    <button id="btnCancelarSol" class="btn-small">Cancelar</button>
+                </div>
+                <div id="accionSolMsg" class="status-msg"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN LAVANDERÍA -->
+    <div id="lavanderia" class="tab-content">
+        <div class="grid-2">
+            <div class="card">
+                <h3>📅 Turnos disponibles</h3>
+                <button id="btnListarTurnos" class="btn-small">Actualizar turnos</button>
+                <div id="listaTurnos" class="result-area" style="max-height: 300px; overflow-y: auto;"></div>
+            </div>
+            <div class="card">
+                <h3>🔍 Buscar turno por ID</h3>
+                <input type="number" id="turnoId" placeholder="ID Turno">
+                <button id="btnBuscarTurno">Buscar</button>
+                <div id="turnoDetalle" class="result-area"></div>
+            </div>
+            <div class="card">
+                <h3>🎯 Asignar / Liberar turno</h3>
+                <input type="number" id="asignarTurnoId" placeholder="ID Turno">
+                <input type="number" id="asignarResidenteId" placeholder="ID Residente">
+                <button id="btnAsignarTurno">Asignar turno</button>
+                <button id="btnLiberarTurno">Liberar turno</button>
+                <div id="msgTurnoAccion" class="status-msg"></div>
+            </div>
+            <div class="card">
+                <h3>🔔 Suscribir / Desuscribir residente a turno</h3>
+                <input type="number" id="suscTurnoId" placeholder="ID Turno">
+                <input type="number" id="suscResidenteId" placeholder="ID Residente">
+                <button id="btnSuscribir">Suscribir</button>
+                <button id="btnDesuscribir">Desuscribir</button>
+                <div id="msgSuscripcion" class="status-msg"></div>
+                <p class="status-msg" style="font-size:0.75rem;">💡 Al liberar un turno, los suscritos reciben notificación (consola del backend).</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Configuración de la API (cambia la URL si es necesario)
+    const API_BASE = 'https://localhost:7021';  // Ajusta según tu puerto
+    // Nota: Si usas http en lugar de https, cambia la URL
+
+    // Helper para peticiones HTTP
+    async function apiRequest(url, options = {}) {
+        try {
+            const response = await fetch(url, {
+                ...options,
+                headers: { 'Content-Type': 'application/json', ...options.headers }
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Error ${response.status}: ${errorText}`);
+            }
+            // Algunas respuestas son texto plano, otras JSON
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                return await response.json();
+            } else {
+                return await response.text();
+            }
+        } catch (error) {
+            console.error('API Error:', error);
+            return { error: error.message };
+        }
+    }
+
+    // ======================= SANCIONES =======================
+    document.getElementById('btnRegistrarFalta').addEventListener('click', async () => {
+        const residenteId = document.getElementById('faltaResidenteId').value;
+        const descripcion = document.getElementById('faltaDescripcion').value;
+        const gravedad = document.getElementById('faltaGravedad').value;
+        if (!descripcion) {
+            document.getElementById('resultadoFalta').innerText = '❌ Ingrese una descripción';
+            return;
+        }
+        const url = `${API_BASE}/api/Sanciones/registrar?residenteId=${residenteId}&descripcion=${encodeURIComponent(descripcion)}&gravedad=${encodeURIComponent(gravedad)}`;
+        const result = await apiRequest(url, { method: 'POST' });
+        document.getElementById('resultadoFalta').innerHTML = `✅ ${result}`;
+        // Refrescar listado
+        cargarTodasSanciones();
+    });
+
+    async function cargarTodasSanciones() {
+        const url = `${API_BASE}/api/Sanciones`;
+        const data = await apiRequest(url);
+        if (Array.isArray(data)) {
+            if (data.length === 0) {
+                document.getElementById('listaSanciones').innerHTML = 'No hay sanciones registradas.';
+                return;
+            }
+            let html = '<table><tr><th>ID</th><th>ResidenteId</th><th>Falta</th><th>Sanción</th><th>Fecha</th><th>Tipo</th></tr>';
+            data.forEach(s => {
+                html += `<tr><td>${s.id}</td><td>${s.residenteId}</td><td>${s.falta}</td><td>${s.descripcionSanción}</td><td>${new Date(s.fecha).toLocaleString()}</td><td>${s.tipo}</td></tr>`;
+            });
+            html += '</table>';
+            document.getElementById('listaSanciones').innerHTML = html;
+        } else {
+            document.getElementById('listaSanciones').innerHTML = 'Error al cargar sanciones';
+        }
+    }
+    document.getElementById('btnListarSanciones').addEventListener('click', cargarTodasSanciones);
+
+    document.getElementById('btnBuscarSanciones').addEventListener('click', async () => {
+        const residenteId = document.getElementById('buscarResidenteId').value;
+        const url = `${API_BASE}/api/Sanciones/residente/${residenteId}`;
+        const data = await apiRequest(url);
+        if (Array.isArray(data)) {
+            if (data.length === 0) {
+                document.getElementById('sancionesResidente').innerHTML = `No hay sanciones para residente ${residenteId}`;
+                return;
+            }
+            let html = '<ul>';
+            data.forEach(s => {
+                html += `<li><strong>${s.falta}</strong> - ${s.descripcionSanción} (${new Date(s.fecha).toLocaleDateString()})</li>`;
+            });
+            html += '</ul>';
+            document.getElementById('sancionesResidente').innerHTML = html;
+        } else {
+            document.getElementById('sancionesResidente').innerHTML = 'Error al obtener sanciones';
+        }
+    });
+
+    // ======================= MANTENIMIENTO =======================
+    document.getElementById('btnCrearSolicitud').addEventListener('click', async () => {
+        const residenteId = document.getElementById('solResidenteId').value;
+        const descripcion = document.getElementById('solDescripcion').value;
+        if (!descripcion) {
+            document.getElementById('resultadoCrearSol').innerText = '❌ Descripción requerida';
+            return;
+        }
+        const url = `${API_BASE}/api/SolicitudesMantenimiento/crear?residenteId=${residenteId}&descripcion=${encodeURIComponent(descripcion)}`;
+        const result = await apiRequest(url, { method: 'POST' });
+        document.getElementById('resultadoCrearSol').innerHTML = `✅ ${result}`;
+        cargarTodasSolicitudes();
+    });
+
+    async function cargarTodasSolicitudes() {
+        const url = `${API_BASE}/api/SolicitudesMantenimiento`;
+        const data = await apiRequest(url);
+        if (Array.isArray(data)) {
+            if (data.length === 0) {
+                document.getElementById('listaSolicitudes').innerHTML = 'No hay solicitudes.';
+                return;
+            }
+            let html = '<table><tr><th>ID</th><th>ResidenteId</th><th>Descripción</th><th>Estado</th><th>Fecha</th></tr>';
+            data.forEach(s => {
+                html += `<tr><td>${s.id}</td><td>${s.residenteId}</td><td>${s.descripcion}</td><td>${s.estado}</td><td>${new Date(s.fechaCreacion).toLocaleString()}</td></tr>`;
+            });
+            html += '</table>';
+            document.getElementById('listaSolicitudes').innerHTML = html;
+        } else {
+            document.getElementById('listaSolicitudes').innerHTML = 'Error al cargar solicitudes';
+        }
+    }
+    document.getElementById('btnListarSolicitudes').addEventListener('click', cargarTodasSolicitudes);
+
+    document.getElementById('btnBuscarSolicitud').addEventListener('click', async () => {
+        const id = document.getElementById('solId').value;
+        if (!id) return;
+        const url = `${API_BASE}/api/SolicitudesMantenimiento/${id}`;
+        const data = await apiRequest(url);
+        if (data && !data.error) {
+            document.getElementById('solicitudDetalle').innerHTML = `
+                <strong>ID:</strong> ${data.id}<br>
+                <strong>Residente:</strong> ${data.residenteId}<br>
+                <strong>Descripción:</strong> ${data.descripcion}<br>
+                <strong>Estado:</strong> ${data.estado}<br>
+                <strong>Creada:</strong> ${new Date(data.fechaCreacion).toLocaleString()}
+            `;
+        } else {
+            document.getElementById('solicitudDetalle').innerHTML = 'Solicitud no encontrada';
+        }
+    });
+
+    async function ejecutarAccionSol(id, action, msgExito) {
+        if (!id) {
+            document.getElementById('accionSolMsg').innerText = '❌ Ingrese ID de solicitud';
+            return false;
+        }
+        const url = `${API_BASE}/api/SolicitudesMantenimiento/${id}/${action}`;
+        const result = await apiRequest(url, { method: 'PUT' });
+        document.getElementById('accionSolMsg').innerHTML = result.error ? `❌ ${result.error}` : `✅ ${msgExito}`;
+        cargarTodasSolicitudes();
+        // Actualizar detalle si está visible
+        document.getElementById('btnBuscarSolicitud').click();
+        return true;
+    }
+
+    document.getElementById('btnAsignarSol').addEventListener('click', () => {
+        const id = document.getElementById('solId').value;
+        ejecutarAccionSol(id, 'asignar', 'Solicitud asignada');
+    });
+    document.getElementById('btnIniciarSol').addEventListener('click', () => {
+        const id = document.getElementById('solId').value;
+        ejecutarAccionSol(id, 'iniciar', 'Reparación iniciada');
+    });
+    document.getElementById('btnCompletarSol').addEventListener('click', () => {
+        const id = document.getElementById('solId').value;
+        ejecutarAccionSol(id, 'completar', 'Solicitud completada');
+    });
+    document.getElementById('btnCancelarSol').addEventListener('click', () => {
+        const id = document.getElementById('solId').value;
+        ejecutarAccionSol(id, 'cancelar', 'Solicitud cancelada');
+    });
+
+    // ======================= LAVANDERÍA =======================
+    async function cargarTurnos() {
+        const url = `${API_BASE}/api/TurnosLavanderia`;
+        const data = await apiRequest(url);
+        if (Array.isArray(data)) {
+            let html = '<table><tr><th>ID</th><th>Hora Inicio</th><th>Hora Fin</th><th>Ocupado</th><th>ResidenteId</th></tr>';
+            data.forEach(t => {
+                html += `<tr>
+                    <td>${t.id}</td>
+                    <td>${new Date(t.horaInicio).toLocaleString()}</td>
+                    <td>${new Date(t.horaFin).toLocaleString()}</td>
+                    <td>${t.estaOcupado ? 'Sí' : 'No'}</td>
+                    <td>${t.residenteId ?? '-'}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            document.getElementById('listaTurnos').innerHTML = html;
+        } else {
+            document.getElementById('listaTurnos').innerHTML = 'Error al cargar turnos';
+        }
+    }
+    document.getElementById('btnListarTurnos').addEventListener('click', cargarTurnos);
+
+    document.getElementById('btnBuscarTurno').addEventListener('click', async () => {
+        const id = document.getElementById('turnoId').value;
+        if (!id) return;
+        const url = `${API_BASE}/api/TurnosLavanderia/${id}`;
+        const data = await apiRequest(url);
+        if (data && !data.error) {
+            document.getElementById('turnoDetalle').innerHTML = `
+                <strong>ID:</strong> ${data.id}<br>
+                <strong>Inicio:</strong> ${new Date(data.horaInicio).toLocaleString()}<br>
+                <strong>Fin:</strong> ${new Date(data.horaFin).toLocaleString()}<br>
+                <strong>Ocupado:</strong> ${data.estaOcupado ? 'Sí' : 'No'}<br>
+                <strong>Residente asignado:</strong> ${data.residenteId ?? 'Ninguno'}
+            `;
+        } else {
+            document.getElementById('turnoDetalle').innerHTML = 'Turno no encontrado';
+        }
+    });
+
+    document.getElementById('btnAsignarTurno').addEventListener('click', async () => {
+        const turnoId = document.getElementById('asignarTurnoId').value;
+        const residenteId = document.getElementById('asignarResidenteId').value;
+        if (!turnoId || !residenteId) {
+            document.getElementById('msgTurnoAccion').innerText = '❌ Complete ID turno y residente';
+            return;
+        }
+        const url = `${API_BASE}/api/TurnosLavanderia/${turnoId}/asignar/${residenteId}`;
+        const result = await apiRequest(url, { method: 'POST' });
+        document.getElementById('msgTurnoAccion').innerHTML = result.error ? `❌ ${result.error}` : `✅ ${result}`;
+        cargarTurnos();
+    });
+
+    document.getElementById('btnLiberarTurno').addEventListener('click', async () => {
+        const turnoId = document.getElementById('asignarTurnoId').value;
+        if (!turnoId) {
+            document.getElementById('msgTurnoAccion').innerText = '❌ Ingrese ID del turno';
+            return;
+        }
+        const url = `${API_BASE}/api/TurnosLavanderia/${turnoId}/liberar`;
+        const result = await apiRequest(url, { method: 'POST' });
+        document.getElementById('msgTurnoAccion').innerHTML = result.error ? `❌ ${result.error}` : `✅ ${result}`;
+        cargarTurnos();
+    });
+
+    document.getElementById('btnSuscribir').addEventListener('click', async () => {
+        const turnoId = document.getElementById('suscTurnoId').value;
+        const residenteId = document.getElementById('suscResidenteId').value;
+        if (!turnoId || !residenteId) {
+            document.getElementById('msgSuscripcion').innerText = '❌ Complete ambos IDs';
+            return;
+        }
+        const url = `${API_BASE}/api/TurnosLavanderia/${turnoId}/suscribir/${residenteId}`;
+        const result = await apiRequest(url, { method: 'POST' });
+        document.getElementById('msgSuscripcion').innerHTML = result.error ? `❌ ${result.error}` : `✅ ${result}`;
+    });
+
+    document.getElementById('btnDesuscribir').addEventListener('click', async () => {
+        const turnoId = document.getElementById('suscTurnoId').value;
+        const residenteId = document.getElementById('suscResidenteId').value;
+        if (!turnoId || !residenteId) {
+            document.getElementById('msgSuscripcion').innerText = '❌ Complete ambos IDs';
+            return;
+        }
+        const url = `${API_BASE}/api/TurnosLavanderia/${turnoId}/desuscribir/${residenteId}`;
+        const result = await apiRequest(url, { method: 'POST' });
+        document.getElementById('msgSuscripcion').innerHTML = result.error ? `❌ ${result.error}` : `✅ ${result}`;
+    });
+
+    // Carga inicial de datos
+    cargarTodasSanciones();
+    cargarTodasSolicitudes();
+    cargarTurnos();
+
+    // Pestañas
+    const tabs = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+            contents.forEach(c => c.classList.remove('active'));
+            tabs.forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+        });
+    });
+</script>
+</body>
+</html>
