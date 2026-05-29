@@ -1,0 +1,6 @@
+@HogarSantaMariaAPI_HostAddress = http://localhost:5110
+
+GET {{HogarSantaMariaAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
